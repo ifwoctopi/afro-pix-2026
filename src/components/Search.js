@@ -28,6 +28,20 @@ const Search = () => {
     'What should I know before signing this legal document?'
   ];
 
+  const readJsonResponse = async (response) => {
+    const responseText = await response.text();
+
+    if (!responseText || !responseText.trim()) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(responseText);
+    } catch {
+      throw new Error(`Server returned an invalid response (status ${response.status})`);
+    }
+  };
+
   /**
    * Extract text from PDF file using pdf.js
    */
@@ -98,7 +112,7 @@ const Search = () => {
           body: formData,
         });
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
 
         if (!response.ok) {
           throw new Error(data.error || 'Failed to process file');
@@ -127,7 +141,7 @@ const Search = () => {
     }
   };
 
-  const simplifyText = async (text, fileUploaded = false) => {
+  const simplifyText = async (text) => {
     setIsLoading(true);
     setShowResults(false);
   
@@ -138,7 +152,7 @@ const Search = () => {
         body: JSON.stringify({ text }),
       });
   
-      const data = await response.json();
+      const data = await readJsonResponse(response);
   
       if (!response.ok) {
         throw new Error(data.error || 'Failed to simplify document');
