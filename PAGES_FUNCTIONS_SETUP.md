@@ -6,22 +6,24 @@ This guide explains how to set up the API using Cloudflare Pages Functions (not 
 
 The API endpoints are handled by Cloudflare Pages Functions located in the `functions/api/` directory:
 
-- `/api/simplify` - Simplifies medical instructions using OpenAI
+- `/api/simplify` - Simplifies legal instructions using Gemini
 - `/api/upload` - Handles file uploads (text files)
 - `/api/health` - Health check endpoint
 
 ## Setup Steps
 
-### 1. Add OpenAI API Key to Cloudflare Pages
+### 1. Add Gemini API Key to Cloudflare Pages
 
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Navigate to **Pages** → Your project (`medi-chat`)
 3. Go to **Settings** → **Environment variables**
 4. Click **Add variable**
 5. Add:
-   - **Variable name**: `OPENAI_API_KEY`
-   - **Value**: Your OpenAI API key (starts with `sk-`)
-   - **Environment**: Select **Production** (and **Preview** if you want it for preview deployments)
+
+- **Variable name**: `GEMINI_API_KEY`
+- **Value**: Your Gemini API key
+- **Environment**: Select **Production** (and **Preview** if you want it for preview deployments)
+
 6. Click **Save**
 
 ### 2. Deploy Your Site
@@ -62,7 +64,7 @@ Pages Functions are serverless functions that run on Cloudflare's edge network. 
 
 - **Location**: `functions/api/[[path]].js`
 - **Routes**: Handles all `/api/*` routes
-- **Environment Variables**: Accessed via `env.OPENAI_API_KEY`
+- **Environment Variables**: Accessed via `env.GEMINI_API_KEY`
 
 ### Frontend Configuration
 
@@ -78,15 +80,15 @@ const API_URL =
   process.env.REACT_APP_API_URL !== undefined
     ? process.env.REACT_APP_API_URL
     : process.env.NODE_ENV === "production"
-    ? ""
-    : "http://localhost:5000";
+      ? ""
+      : "http://localhost:5000";
 ```
 
 ## API Endpoints
 
 ### POST `/api/simplify`
 
-Simplifies medical instructions using OpenAI.
+Simplifies legal instructions using Gemini.
 
 **Request:**
 
@@ -173,7 +175,7 @@ For local development, you can still use the Flask API:
 
 ### API Returns 500 Errors
 
-- Verify `OPENAI_API_KEY` is set in Cloudflare Pages environment variables
+- Verify `GEMINI_API_KEY` is set in Cloudflare Pages environment variables
 - Check Pages Function logs in Cloudflare Dashboard → Pages → Your project → Functions → Logs
 - Verify API key format (should start with `sk-`)
 
@@ -220,7 +222,7 @@ The Pages Function includes CORS headers automatically. If you see CORS errors:
 
 ## Next Steps
 
-1. Set `OPENAI_API_KEY` in Cloudflare Pages environment variables
+1. Set `GEMINI_API_KEY` in Cloudflare Pages environment variables
 2. Deploy your site (via Git or manually)
 3. Test the API endpoints
 4. Verify the frontend is working correctly

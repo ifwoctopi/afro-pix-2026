@@ -250,10 +250,15 @@ export default function LawyerMap({ keyword, refreshKey = 0 }) {
         await Promise.all(enrichNamePromises);
 
         const sortedPlaces = [...places].sort((a, b) => ((b.rating || 0) - (a.rating || 0)));
+        const bounds = new window.google.maps.LatLngBounds();
+        let topMarker = null;
+
         sortedPlaces.forEach((place) => {
           if (!place.location) return;
 
           const advisorName = getPlaceDisplayName(place);
+
+          bounds.extend(place.location);
 
           const marker = new window.google.maps.Marker({
             map: mapRef.current,
@@ -294,7 +299,18 @@ export default function LawyerMap({ keyword, refreshKey = 0 }) {
           });
 
           markersRef.current.push(marker);
+          if (!topMarker) {
+            topMarker = marker;
+          }
         });
+
+        if (!bounds.isEmpty()) {
+          mapRef.current.fitBounds(bounds);
+        }
+
+        if (topMarker) {
+          window.google.maps.event.trigger(topMarker, "click");
+        }
       } catch (searchError) {
         setError(searchError?.message || "Failed to search nearby legal advisors.");
       }
