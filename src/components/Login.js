@@ -87,9 +87,9 @@ const Login = () => {
               </div>
             </div>
             <div className="hidden md:block">
-              <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative h-100 rounded-2xl overflow-hidden shadow-2xl">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1512069511692-b82d787265cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwaGVhbHRoY2FyZXxlbnwxfHx8fDE3NjI1MTI5Njl8MA&ixlib=rb-4.1.0&q=80&w=1080"
+                  src="/images/afro-pix-logo.png"
                   alt="Legal consultation"
                   className="w-full h-full object-cover"
                 />

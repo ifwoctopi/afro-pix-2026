@@ -297,14 +297,14 @@ export async function onRequest(context) {
 
     // Simplify endpoint
     if (pathname === '/api/simplify' && request.method === 'POST') {
-      const apiKey = env.GEMINI_API_KEY;
+      const apiKey = env.GEMINI_API_KEY || env.GOOGLE_API_KEY;
       const configuredModel = env.GEMINI_MODEL;
       const maxOutputTokens = getMaxOutputTokens(env);
       if (!apiKey) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: 'GEMINI_API_KEY is not configured',
+            error: 'Missing Gemini key. Set GEMINI_API_KEY in Cloudflare Pages environment variables.',
           }),
           {
             status: 500,
@@ -322,6 +322,22 @@ export async function onRequest(context) {
           JSON.stringify({
             success: false,
             error: 'Invalid Gemini API key format',
+          }),
+          {
+            status: 500,
+            headers: {
+              'Content-Type': 'application/json',
+              ...getCorsHeaders(),
+            },
+          }
+        );
+      }
+
+      if (apiKey.startsWith('sk-')) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'OPENAI-style key detected. This endpoint requires a Gemini key in GEMINI_API_KEY.',
           }),
           {
             status: 500,
