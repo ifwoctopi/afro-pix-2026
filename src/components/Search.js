@@ -212,9 +212,23 @@ const Search = () => {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <h2>⚖️ Legal Compass AI</h2>
+            <button
+              type="button"
+              className="nav-logo-link"
+              onClick={() => navigate('/home')}
+              aria-label="Go to home page"
+            >
+              <img src="/images/afro-pix-logo.png" alt="Compass logo" className="nav-logo-image" />
+              <h2>Compass</h2>
+            </button>
           </div>
           <div className="nav-user">
+            <button
+              className="dictionary-btn"
+              onClick={() => navigate('/home')}
+            >
+              Home
+            </button>
             <button 
               className="dictionary-btn" 
               onClick={() => navigate('/dictionary')}
@@ -299,7 +313,7 @@ const Search = () => {
                 {isLoading ? (
                   <span className="spinner">⏳ Processing...</span>
                 ) : (
-                  'Simplify'
+                  'Ask Jarvis'
                 )}
               </button>
             </form>

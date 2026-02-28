@@ -61,13 +61,15 @@ const Home = () => {
     <div className="home-page">
       <nav className="home-nav">
         <div className="home-nav-container">
-          <div className="home-brand">
-            <img src="/images/afro-pix-logo.png" alt="Legal Compass logo" className="home-brand-logo" />
-            <div>
-              <h2>Compass</h2>
-              <p>Legal Access for All</p>
+          <button type="button" className="home-brand-link" onClick={() => navigate('/home')} aria-label="Go to home page">
+            <div className="home-brand">
+              <img src="/images/afro-pix-logo.png" alt="Compass logo" className="home-brand-logo" />
+              <div>
+                <h2>Compass</h2>
+                <p>Legal Access for All</p>
+              </div>
             </div>
-          </div>
+          </button>
           <div className="home-user-actions">
             <button className="home-btn home-btn-secondary" onClick={() => navigate('/about')}>About</button>
             <span>{userEmail}</span>

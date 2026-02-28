@@ -43,7 +43,7 @@ const Login = () => {
         if (signInError) {
           setError(signInError.message || 'Failed to sign in');
         } else {
-          navigate('/search');
+          navigate('/home');
         }
       }
     } catch (err) {
@@ -60,7 +60,7 @@ const Login = () => {
         <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to Legal Compass AI</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to Compass</h1>
               <p className="text-lg mb-8 text-white/90">
                 Turn complex legal documents into clear, plain-language summaries.
                 Get AI guidance and find nearby lawyers or legal clinics when you need help.
@@ -108,7 +108,7 @@ const Login = () => {
               <CardDescription>
                 {isSignUp 
                   ? 'Create your account to simplify legal documents'
-                  : 'Enter your credentials to access Legal Compass AI'
+                  : 'Enter your credentials to access Compass'
                 }
               </CardDescription>
             </CardHeader>

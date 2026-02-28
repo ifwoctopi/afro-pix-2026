@@ -219,6 +219,41 @@ async function extractTextFromFile(file, filename) {
   }
 }
 
+function inferReferralData(rawText, simplifiedText) {
+  const combinedText = `${rawText}\n${simplifiedText}`.toLowerCase();
+
+  const specialtyPatterns = [
+    ['tenant rights lawyer', [/\brent\b/, /\btenant\b/, /\blease\b/, /\beviction\b/, /\blandlord\b/, /\bhousing\b/]],
+    ['employment lawyer', [/\bemployment\b/, /\bworkplace\b/, /\bwage\b/, /\bovertime\b/, /\bwrongful termination\b/, /\bharassment\b/]],
+    ['immigration attorney', [/\bimmigration\b/, /\bvisa\b/, /\bgreen card\b/, /\basylum\b/, /\bcitizenship\b/]],
+    ['family law attorney', [/\bdivorce\b/, /\bcustody\b/, /\balimony\b/, /\bchild support\b/, /\bfamily court\b/]],
+    ['criminal defense attorney', [/\bcriminal\b/, /\barrest\b/, /\bcharge\b/, /\bdui\b/, /\bfelony\b/, /\bmisdemeanor\b/]],
+    ['personal injury lawyer', [/\baccident\b/, /\binjury\b/, /\bmedical bills\b/, /\bnegligence\b/]],
+    ['bankruptcy attorney', [/\bbankruptcy\b/, /\bdebt\b/, /\bchapter 7\b/, /\bchapter 13\b/, /\bcollections\b/]],
+    ['estate planning attorney', [/\bwill\b/, /\btrust\b/, /\bprobate\b/, /\bestate\b/, /\bpower of attorney\b/]],
+    ['contract lawyer', [/\bcontract\b/, /\bagreement\b/, /\bbreach\b/, /\bterms and conditions\b/]],
+  ];
+
+  let inferredKeyword = 'legal aid clinic';
+  for (const [specialty, patterns] of specialtyPatterns) {
+    if (patterns.some((pattern) => pattern.test(combinedText))) {
+      inferredKeyword = specialty;
+      break;
+    }
+  }
+
+  const mapIntentPatterns = [/\bfind\b/, /\blook\s*up\b/, /\bsearch\b/, /\bnear\s*me\b/, /\bnearby\b/, /\bmap\b/, /\bopen\b/, /\blocate\b/, /\bconnect me\b/, /\breferral\b/];
+  const practitionerPatterns = [/\blawyer\b/, /\battorney\b/, /\blegal advisor\b/, /\blegal aid\b/, /\blegal clinic\b/, /\bpractitioner\b/];
+
+  const hasMapIntent = mapIntentPatterns.some((pattern) => pattern.test(combinedText));
+  const hasPractitionerIntent = practitionerPatterns.some((pattern) => pattern.test(combinedText));
+
+  return {
+    aiKeywords: inferredKeyword,
+    openAdvisorsTab: hasMapIntent && hasPractitionerIntent,
+  };
+}
+
 /**
  * Handle CORS headers
  */
@@ -318,11 +353,14 @@ export async function onRequest(context) {
       }
 
       const simplified = await simplifyInstructions(text, apiKey, configuredModel, maxOutputTokens);
+      const referralData = inferReferralData(text, simplified);
 
       return new Response(
         JSON.stringify({
           success: true,
           result: simplified,
+          aiKeywords: referralData.aiKeywords,
+          openAdvisorsTab: referralData.openAdvisorsTab,
         }),
         {
           status: 200,

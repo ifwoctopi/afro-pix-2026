@@ -13,9 +13,9 @@
 const envApiUrl = process.env.REACT_APP_API_URL;
 const hasExplicitApiUrl = typeof envApiUrl === 'string' && envApiUrl.trim().length > 0;
 
-const API_URL = hasExplicitApiUrl
-  ? envApiUrl.trim()
-  : (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? '/api'  // In Cloudflare, this hits your /functions/api folder
+  : 'http://localhost:5000'; // Local development
 
 export default API_URL;
 
