@@ -1,0 +1,154 @@
+.advisors-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fbf5ec 0%, #f0e0cc 100%);
+}
+
+.navbar {
+  background: #f7efe2;
+  border-bottom: 1px solid #d2b290;
+  padding: 15px 0;
+  margin-bottom: 30px;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.nav-logo h2 {
+  color: #8b5e3c;
+  font-size: 24px;
+  margin: 0;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-user span {
+  color: #6d5138;
+  font-size: 14px;
+}
+
+.nav-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #c9a37a;
+  background: #f3e4d2;
+  color: #5f422a;
+  border-radius: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-tab-btn:hover {
+  background: #e7cfb1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.advisors-section {
+  background: #fffaf4;
+  border: 1px solid #ddc2a3;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 14px 30px rgba(139, 94, 60, 0.16);
+}
+
+.advisors-section h1 {
+  color: #5d3f27;
+  font-size: 34px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.subtitle {
+  color: #7c6149;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.advisor-search-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.advisor-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.advisor-input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9a6a45;
+}
+
+.advisor-input {
+  width: 100%;
+  background: #fff;
+  color: #3a2b1f;
+  border: 1px solid #c9a37a;
+  border-radius: 8px;
+  padding: 11px 12px 11px 38px;
+}
+
+.advisor-input:focus {
+  outline: none;
+  border-color: #8b5e3c;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #8b5e3c 0%, #6f492d 100%);
+  color: #fff;
+  border: 1px solid #8b5e3c;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #9a6a45 0%, #7b5434 100%);
+}
+
+.btn-secondary {
+  background: #ead7bf;
+  color: #4f3826;
+  border: 1px solid #c9a37a;
+}
+
+.btn-secondary:hover {
+  background: #e0c6a7;
+}
+
+.advisors-map-shell h3 {
+  color: #6b4c32;
+  margin-bottom: 10px;
+}

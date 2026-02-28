@@ -1,0 +1,47 @@
+{
+  "name": "Medi-Chat",
+  "version": "1.0.0",
+  "homepage": ".",
+  "description": "Medi-Chat - React Frontend",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "react-scripts": "5.0.1",
+    "lucide-react": "^0.294.0",
+    "@supabase/supabase-js": "^2.38.4",
+    "pdfjs-dist": "^3.11.174"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.6",
+    "postcss": "^8.4.32",
+    "autoprefixer": "^10.4.16"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "deploy": "npm run build && npx wrangler pages deploy build --project-name=medi-chat",
+    "deploy:prod": "npm run build && npx wrangler pages deploy build --project-name=medi-chat --branch=main"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+

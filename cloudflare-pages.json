@@ -1,0 +1,9 @@
+{
+  "build_command": "npm --prefix 2025-Fall-Hackathon run build",
+  "output_directory": "2025-Fall-Hackathon/build",
+  "root": "/",
+  "environment_variables": {
+    "NODE_VERSION": "18"
+  }
+}
+
