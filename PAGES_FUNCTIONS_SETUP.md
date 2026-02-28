@@ -19,9 +19,11 @@ The API endpoints are handled by Cloudflare Pages Functions located in the `func
 3. Go to **Settings** → **Environment variables**
 4. Click **Add variable**
 5. Add:
-  - **Variable name**: `GEMINI_API_KEY`
-  - **Value**: Your Gemini API key
-   - **Environment**: Select **Production** (and **Preview** if you want it for preview deployments)
+
+- **Variable name**: `GEMINI_API_KEY`
+- **Value**: Your Gemini API key
+- **Environment**: Select **Production** (and **Preview** if you want it for preview deployments)
+
 6. Click **Save**
 
 ### 2. Deploy Your Site
@@ -78,8 +80,8 @@ const API_URL =
   process.env.REACT_APP_API_URL !== undefined
     ? process.env.REACT_APP_API_URL
     : process.env.NODE_ENV === "production"
-    ? ""
-    : "http://localhost:5000";
+      ? ""
+      : "http://localhost:5000";
 ```
 
 ## API Endpoints
