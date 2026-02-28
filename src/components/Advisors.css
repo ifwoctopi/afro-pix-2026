@@ -27,6 +27,25 @@
   margin: 0;
 }
 
+.nav-logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.nav-logo-image {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #c9a37a;
+}
+
 .nav-user {
   display: flex;
   align-items: center;

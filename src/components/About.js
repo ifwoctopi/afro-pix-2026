@@ -42,7 +42,7 @@ const About = () => {
       name: 'Darrell Pratt',
       role: 'Backend Engineer',
       bio: 'Developed and structured the Supabase database powering Compass, managing authentication and securely storing user data. Designed the schema for dictionary terms and legal references, enabling efficient access and retrieval across the platform.',
-      image: '/images/IMG_0964 (2).jpeg'
+      image: '/images/IMG_0964%20(2).jpeg'
     },
     {
       name: 'Jalen Washington',
@@ -113,7 +113,7 @@ const About = () => {
                       alt={`${leader.name} portrait`}
                       className="leader-photo"
                       onError={(event) => {
-                        event.currentTarget.src = '/images/afro-pix-logo.png';
+                        event.currentTarget.src = '/images/head-shot.jpg';
                       }}
                     />
                     <div className="leader-name-bar">

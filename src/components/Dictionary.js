@@ -86,9 +86,23 @@ const Dictionary = () => {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <h2>⚖️ Legal Compass AI</h2>
+            <button
+              type="button"
+              className="nav-logo-link"
+              onClick={() => navigate('/home')}
+              aria-label="Go to home page"
+            >
+              <img src="/images/afro-pix-logo.png" alt="Compass logo" className="nav-logo-image" />
+              <h2>Compass</h2>
+            </button>
           </div>
           <div className="nav-actions">
+            <button
+              className="btn btn-secondary"
+              onClick={() => navigate('/home')}
+            >
+              Home
+            </button>
             <button 
               className="btn btn-secondary" 
               onClick={() => navigate('/search')}

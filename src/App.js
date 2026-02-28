@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
+import Home from './components/Home';
+import About from './components/About';
 import Search from './components/Search';
 import Dictionary from './components/Dictionary';
 import Quiz from './components/Quiz';
@@ -39,7 +41,7 @@ function PublicRoute({ children }) {
     );
   }
 
-  return isAuthenticated ? <Navigate to="/search" /> : children;
+  return isAuthenticated ? <Navigate to="/home" /> : children;
 }
 
 function AppRoutes() {
@@ -51,6 +53,22 @@ function AppRoutes() {
           <PublicRoute>
             <Login />
           </PublicRoute>
+        }
+      />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <ProtectedRoute>
+            <About />
+          </ProtectedRoute>
         }
       />
       <Route
@@ -85,7 +103,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to="/home" />} />
     </Routes>
   );
 }
