@@ -9,9 +9,7 @@
  */
 
 // If deployed on Cloudflare Pages, use relative URLs (same origin)
-// For local development, use localhost unless an explicit non-empty URL is provided.
-const envApiUrl = process.env.REACT_APP_API_URL;
-const hasExplicitApiUrl = typeof envApiUrl === 'string' && envApiUrl.trim().length > 0;
+// For local development, use localhost.
 
 const API_URL = process.env.NODE_ENV === 'production' 
   ? '/api'  // In Cloudflare, this hits your /functions/api folder
