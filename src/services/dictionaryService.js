@@ -1,5 +1,15 @@
 import { supabase } from '../config/supabase';
 
+const normalizeDictionaryRows = (rows = []) => {
+  return rows.map((row) => ({
+    id: row.id,
+    term: row.term,
+    medical_term: row.term,
+    definition: row.definition,
+    why_matters: row.why_matters || null,
+  }));
+};
+
 /**
  * Search the medical dictionary for terms
  * @param {string} searchTerm - The term to search for
@@ -12,16 +22,17 @@ export const searchDictionary = async (searchTerm, useFullTextSearch = false) =>
       return { data: [], error: null };
     }
 
-    // Direct query to include why_matters field
+    const cleanedSearchTerm = searchTerm.trim();
+
     const { data, error } = await supabase
       .from('dictionary')
-      .select('id, medical_term, definition, why_matters')
-      .or(`medical_term.ilike.%${searchTerm.trim()}%,definition.ilike.%${searchTerm.trim()}%`)
-      .order('medical_term', { ascending: true })
+      .select('id, term, definition')
+      .or(`term.ilike.%${cleanedSearchTerm}%,definition.ilike.%${cleanedSearchTerm}%`)
+      .order('term', { ascending: true })
       .limit(50);
 
     if (error) throw error;
-    return { data: data || [], error: null };
+    return { data: normalizeDictionaryRows(data || []), error: null };
   } catch (error) {
     console.error('Error searching dictionary:', error);
     return { data: null, error };
@@ -37,13 +48,16 @@ export const getDictionaryTerm = async (term) => {
   try {
     const { data, error } = await supabase
       .from('dictionary')
-      .select('id, medical_term, definition, why_matters')
-      .ilike('medical_term', term)
+      .select('id, term, definition')
+      .ilike('term', term)
       .limit(1)
       .single();
 
     if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
-    return { data: data || null, error: null };
+    return {
+      data: data ? normalizeDictionaryRows([data])[0] : null,
+      error: null,
+    };
   } catch (error) {
     console.error('Error getting dictionary term:', error);
     return { data: null, error };
@@ -60,12 +74,12 @@ export const getAllDictionaryTerms = async (limit = 1000, offset = 0) => {
   try {
     const { data, error } = await supabase
       .from('dictionary')
-      .select('id, medical_term, definition, why_matters')
-      .order('medical_term', { ascending: true })
+      .select('id, term, definition')
+      .order('term', { ascending: true })
       .range(offset, offset + limit - 1);
 
     if (error) throw error;
-    return { data: data || [], error: null };
+    return { data: normalizeDictionaryRows(data || []), error: null };
   } catch (error) {
     console.error('Error getting dictionary terms:', error);
     return { data: null, error };

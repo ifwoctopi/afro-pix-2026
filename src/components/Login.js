@@ -6,12 +6,11 @@ import { Input } from './ui/Input';
 import { Label } from './ui/Label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { Heart, Shield, Clock, CheckCircle } from 'lucide-react';
+import { Gavel, Shield, Clock, CheckCircle } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,15 +28,9 @@ const Login = () => {
       return;
     }
 
-    if (isSignUp && !fullName) {
-      setError('Please enter your full name');
-      setLoading(false);
-      return;
-    }
-
     try {
       if (isSignUp) {
-        const { error: signUpError } = await signUp(email, password, fullName);
+        const { error: signUpError } = await signUp(email, password);
         if (signUpError) {
           setError(signUpError.message || 'Failed to create account');
         } else {
@@ -61,16 +54,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-orange-100">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-r from-amber-800 to-stone-700 text-white">
         <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to Medi-Chat</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to Legal Compass AI</h1>
               <p className="text-lg mb-8 text-white/90">
-                Transform complex medical instructions into simple, easy-to-understand language. 
-                Get personalized assistance from our AI medical assistant.
+                Turn complex legal documents into clear, plain-language summaries.
+                Get AI guidance and find nearby lawyers or legal clinics when you need help.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -83,13 +76,13 @@ const Login = () => {
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                     <Clock className="w-5 h-5" />
                   </div>
-                  <span>Instant medical instruction simplification</span>
+                  <span>Instant legal document simplification</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <Heart className="w-5 h-5" />
+                    <Gavel className="w-5 h-5" />
                   </div>
-                  <span>AI-powered health assistance</span>
+                  <span>AI-powered legal guidance and referrals</span>
                 </div>
               </div>
             </div>
@@ -97,7 +90,7 @@ const Login = () => {
               <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
                 <ImageWithFallback
                   src="https://images.unsplash.com/photo-1512069511692-b82d787265cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwaGVhbHRoY2FyZXxlbnwxfHx8fDE3NjI1MTI5Njl8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                  alt="Medical care"
+                  alt="Legal consultation"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -114,8 +107,8 @@ const Login = () => {
               <CardTitle>{isSignUp ? 'Create Your Account' : 'Sign In to Your Account'}</CardTitle>
               <CardDescription>
                 {isSignUp 
-                  ? 'Get started with your medical information portal'
-                  : 'Enter your credentials to access Medi-Chat'
+                  ? 'Create your account to simplify legal documents'
+                  : 'Enter your credentials to access Legal Compass AI'
                 }
               </CardDescription>
             </CardHeader>
@@ -126,20 +119,6 @@ const Login = () => {
                 </div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
-                {isSignUp && (
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      type="text"
-                      placeholder="John Doe"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required={isSignUp}
-                      disabled={loading}
-                    />
-                  </div>
-                )}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
                   <Input
@@ -179,7 +158,7 @@ const Login = () => {
                       <button
                         type="button"
                         onClick={() => setIsSignUp(false)}
-                        className="text-blue-600 hover:underline font-medium"
+                        className="text-amber-800 hover:underline font-medium"
                       >
                         Sign in
                       </button>
@@ -190,7 +169,7 @@ const Login = () => {
                       <button
                         type="button"
                         onClick={() => setIsSignUp(true)}
-                        className="text-blue-600 hover:underline font-medium"
+                        className="text-amber-800 hover:underline font-medium"
                       >
                         Sign up
                       </button>
@@ -204,24 +183,24 @@ const Login = () => {
           {/* Features */}
           <div className="mt-12 grid gap-6">
             <div className="flex items-start gap-4">
-              <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+              <CheckCircle className="w-6 h-6 text-amber-800 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-semibold mb-1">Simple Instruction Translation</h3>
-                <p className="text-gray-600 text-sm">Transform complex medical terminology into easy-to-understand language</p>
+                <p className="text-gray-600 text-sm">Transform legal language into easy-to-understand summaries</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+              <CheckCircle className="w-6 h-6 text-amber-800 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-semibold mb-1">AI-Powered Assistance</h3>
-                <p className="text-gray-600 text-sm">Your personal AI medical assistant, available 24/7 to help answer questions</p>
+                <p className="text-gray-600 text-sm">Your personal AI legal assistant, available 24/7 for document questions</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+              <CheckCircle className="w-6 h-6 text-amber-800 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-semibold mb-1">Easy Access Anywhere</h3>
-                <p className="text-gray-600 text-sm">Access your medical information from any device, anytime</p>
+                <p className="text-gray-600 text-sm">Find legal help and review documents from any device, anytime</p>
               </div>
             </div>
           </div>

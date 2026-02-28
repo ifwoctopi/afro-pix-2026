@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAllDictionaryTerms } from '../services/dictionaryService';
-import { Book, CheckCircle, XCircle, RotateCcw, ArrowLeft } from 'lucide-react';
+import { Book, CheckCircle, XCircle, RotateCcw, ArrowLeft, MapPin } from 'lucide-react';
 import './Quiz.css';
 
 const Quiz = () => {
@@ -34,7 +34,7 @@ const Quiz = () => {
       setAllTerms(data || []);
     } catch (error) {
       console.error('Error loading dictionary terms:', error);
-      alert(`Failed to load dictionary: ${error.message}`);
+      alert(`Failed to load legal glossary: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +46,7 @@ const Quiz = () => {
 
   const startQuiz = () => {
     if (allTerms.length < QUESTION_COUNT) {
-      alert(`Not enough terms in dictionary. Need at least ${QUESTION_COUNT} terms.`);
+      alert(`Not enough terms in the legal glossary. Need at least ${QUESTION_COUNT} terms.`);
       return;
     }
 
@@ -60,7 +60,7 @@ const Quiz = () => {
       const options = generateOptions(term);
       if (questionType === 'term') {
         return {
-          question: `What is the definition of "${term.medical_term}"?`,
+          question: `What is the definition of "${term.medical_term}" in legal context?`,
           options: options.map(opt => ({
             id: opt.id,
             text: opt.definition,
@@ -70,7 +70,7 @@ const Quiz = () => {
         };
       } else {
         return {
-          question: `Which term matches this definition: "${term.definition.substring(0, 150)}${term.definition.length > 150 ? '...' : ''}"?`,
+          question: `Which legal term matches this definition: "${term.definition.substring(0, 150)}${term.definition.length > 150 ? '...' : ''}"?`,
           options: options.map(opt => ({
             id: opt.id,
             text: opt.medical_term,
@@ -180,7 +180,7 @@ const Quiz = () => {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <h2>🏥 Medical Dictionary Quiz</h2>
+            <h2>⚖️ Legal Glossary Quiz</h2>
           </div>
           <div className="nav-actions">
             <button 
@@ -188,7 +188,14 @@ const Quiz = () => {
               onClick={() => navigate('/dictionary')}
             >
               <ArrowLeft size={16} style={{ marginRight: '6px' }} />
-              Back to Dictionary
+              Back to Glossary
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => navigate('/advisors')}
+            >
+              <MapPin size={16} style={{ marginRight: '6px' }} />
+              Legal Advisors
             </button>
             <span className="nav-user-email">{userEmail}</span>
             <button className="btn btn-secondary" onClick={handleLogout}>
@@ -205,10 +212,10 @@ const Quiz = () => {
               <div className="quiz-start-header">
                 <h1>
                   <Book size={32} className="header-icon" />
-                  Medical Dictionary Quiz
+                  Legal Glossary Quiz
                 </h1>
                 <p className="subtitle">
-                  Test your knowledge of medical terms! Answer {QUESTION_COUNT} questions to see how well you know your medical terminology.
+                  Test your knowledge of legal terms. Answer {QUESTION_COUNT} questions to check your legal vocabulary.
                 </p>
               </div>
 
@@ -278,10 +285,10 @@ const Quiz = () => {
               </div>
 
               <div className="result-message">
-                {percentage >= 90 && <p className="excellent">Excellent work! You're a medical terminology expert! 🌟</p>}
-                {percentage >= 70 && percentage < 90 && <p className="good">Great job! You have a solid understanding! 👍</p>}
-                {percentage >= 50 && percentage < 70 && <p className="fair">Good effort! Keep studying to improve! 📚</p>}
-                {percentage < 50 && <p className="needs-improvement">Keep practicing! Review the dictionary to improve! 💪</p>}
+                {percentage >= 90 && <p className="excellent">Excellent work! You're a legal terminology expert! 🌟</p>}
+                {percentage >= 70 && percentage < 90 && <p className="good">Great job! You have a strong grasp of legal terms! 👍</p>}
+                {percentage >= 50 && percentage < 70 && <p className="fair">Good effort! Keep studying to improve your legal vocabulary. 📚</p>}
+                {percentage < 50 && <p className="needs-improvement">Keep practicing! Review the legal glossary to improve. 💪</p>}
               </div>
 
               <div className="result-actions">
@@ -290,7 +297,7 @@ const Quiz = () => {
                   Try Again
                 </button>
                 <button className="btn btn-secondary" onClick={() => navigate('/dictionary')}>
-                  Back to Dictionary
+                  Back to Glossary
                 </button>
               </div>
             </div>

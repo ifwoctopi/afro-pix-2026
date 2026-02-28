@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from openai import OpenAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 import io
+
+print("USING GEMINI BACKEND")
 try:
     import PyPDF2
     PDF_SUPPORT = True
@@ -16,54 +18,108 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
 
-# Initialize OpenAI client
-api_key = os.environ.get("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is not set. Please create a .env file with your API key.")
+# Initialize Gemini client
+gemini_api_key = os.environ.get("GEMINI_API_KEY")
+if not gemini_api_key:
+    raise ValueError("GEMINI_API_KEY environment variable is not set. Please create a .env file with your Gemini key.")
 
-# Security: Validate API key format (starts with sk-)
-if not api_key.startswith("sk-"):
-    raise ValueError("Invalid API key format. OpenAI API keys should start with 'sk-'.")
+genai.configure(api_key=gemini_api_key)
+gemini_model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
-client = OpenAI(api_key=api_key)
+try:
+    gemini_max_output_tokens = int(os.environ.get("GEMINI_MAX_OUTPUT_TOKENS", "2048"))
+except ValueError:
+    gemini_max_output_tokens = 2048
+
+model = genai.GenerativeModel(gemini_model_name)
+chunk_char_limit = int(os.environ.get("GEMINI_CHUNK_CHAR_LIMIT", "7000"))
+
+
+def split_text_into_chunks(text: str, max_chars: int = 7000):
+    if not text or len(text) <= max_chars:
+        return [text]
+
+    chunks = []
+    paragraphs = text.split("\n\n")
+    current_chunk = ""
+
+    for paragraph in paragraphs:
+        candidate = f"{current_chunk}\n\n{paragraph}" if current_chunk else paragraph
+
+        if len(candidate) <= max_chars:
+            current_chunk = candidate
+            continue
+
+        if current_chunk:
+            chunks.append(current_chunk)
+            current_chunk = ""
+
+        if len(paragraph) <= max_chars:
+            current_chunk = paragraph
+            continue
+
+        for i in range(0, len(paragraph), max_chars):
+            chunks.append(paragraph[i:i + max_chars])
+
+    if current_chunk:
+        chunks.append(current_chunk)
+
+    return [chunk for chunk in chunks if chunk]
+
+
+def simplify_single_chunk(chunk_text: str):
+    system_prompt = """You are a legal education assistant.
+Your job is to rephrase legal documents into plain, easy-to-understand language.
+- Use simple terms and short sentences.
+- Explain legal terms in context.
+- Keep important obligations, deadlines, and warnings intact.
+- Preserve approximately the same amount of detail as the source; do not over-compress.
+- Never provide definitive legal advice or claim attorney-client relationship.
+- If something is unclear, say: "Consult a licensed attorney for clarification."
+- End with: (Source: Educational summary, not legal advice.)"""
+
+    response = model.generate_content(
+        [system_prompt, chunk_text],
+        generation_config=genai.types.GenerationConfig(
+            temperature=0.2,
+            max_output_tokens=gemini_max_output_tokens,
+        ),
+    )
+
+    response_text = (response.text or "").strip()
+    if response_text:
+        return response_text
+
+    if hasattr(response, "candidates") and response.candidates:
+        parts = response.candidates[0].content.parts
+        fallback_text = "".join(getattr(part, "text", "") for part in parts).strip()
+        if fallback_text:
+            return fallback_text
+
+    raise Exception("Gemini returned an empty response.")
 
 def simplify_instructions(raw_text: str):
     """
-    Simplify medical instructions using OpenAI.
-    This function is based on the model from test.py
+    Simplify legal documents using Gemini.
     """
-    system_prompt = """You are a medical education assistant.
-Your job is to rephrase medical or device instructions into plain, easy-to-understand language.
-- Use simple terms and short sentences.
-- Define medical words using reputable sources like WebMD or Harvard Health.
-- Never remove or change safety warnings.
-- Never give personal medical advice or make recommendations.
-- If a step seems unclear, say: "Ask your healthcare provider for clarification."
-- Always include: (Source: Educational summary, not medical advice.)"""
-
     try:
-        # Use the correct OpenAI API method (chat.completions.create)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": raw_text}
-            ],
-            temperature=0.2,
-            max_tokens=800
-        )
-        
-        return response.choices[0].message.content
+        chunks = split_text_into_chunks(raw_text, chunk_char_limit)
+        chunk_results = [simplify_single_chunk(chunk) for chunk in chunks]
+
+        if len(chunk_results) == 1:
+            return chunk_results[0]
+
+        return "\n\n".join([f"Section {idx + 1}:\n{result}" for idx, result in enumerate(chunk_results)])
     except Exception as e:
         # Security: Don't expose full API key in error messages
         error_msg = str(e)
-        if api_key in error_msg:
-            error_msg = error_msg.replace(api_key, "***REDACTED***")
-        raise Exception(f"Error calling OpenAI API: {error_msg}")
+        if gemini_api_key in error_msg:
+            error_msg = error_msg.replace(gemini_api_key, "***REDACTED***")
+        raise Exception(f"Error calling Gemini API: {error_msg}")
 
 @app.route('/api/simplify', methods=['POST'])
 def simplify():
-    """API endpoint to simplify medical instructions."""
+    """API endpoint to simplify legal documents."""
     try:
         data = request.get_json()
         

@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Function for API endpoints
- * This handles all /api/* routes for the medical instruction simplifier
+ * This handles all /api/* routes for the legal document simplifier
  * 
  * Routes:
  * - POST /api/simplify - Simplify medical instructions
@@ -8,52 +8,193 @@
  * - GET /api/health - Health check
  */
 
-// System prompt for OpenAI
-const SYSTEM_PROMPT = `You are a medical education assistant.
-Your job is to rephrase medical or device instructions into plain, easy-to-understand language.
+// System prompt for Gemini
+const SYSTEM_PROMPT = `You are a legal education assistant.
+Your job is to rephrase legal documents into plain, easy-to-understand language.
 - Use simple terms and short sentences.
-- Define medical words using reputable sources like WebMD or Harvard Health.
-- Never remove or change safety warnings.
-- Never give personal medical advice or make recommendations.
-- If a step seems unclear, say: "Ask your healthcare provider for clarification."
-- Always include: (Source: Educational summary, not medical advice.)`;
+- Explain legal terms in context.
+- Keep important obligations, deadlines, and warnings intact.
+- Preserve approximately the same amount of detail as the source; do not over-compress.
+- Never provide definitive legal advice or claim attorney-client relationship.
+- If something is unclear, say: "Consult a licensed attorney for clarification."
+- End with: (Source: Educational summary, not legal advice.)`;
 
-/**
- * Simplify medical instructions using OpenAI
- */
-async function simplifyInstructions(text, apiKey) {
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: text },
-        ],
+const CHUNK_CHAR_LIMIT = 7000;
+
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+const DEFAULT_MODEL_CANDIDATES = [
+  'gemini-2.0-flash',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-pro-latest',
+  'gemini-1.5-flash',
+  'gemini-2.5-flash'
+];
+
+function normalizeModelName(modelName) {
+  if (!modelName || typeof modelName !== 'string') {
+    return null;
+  }
+
+  return modelName.trim().replace(/^models\//, '');
+}
+
+function buildModelCandidates(preferredModel) {
+  const unique = new Set();
+  const ordered = [preferredModel, ...DEFAULT_MODEL_CANDIDATES]
+    .map(normalizeModelName)
+    .filter(Boolean);
+
+  for (const model of ordered) {
+    unique.add(model);
+  }
+
+  return Array.from(unique);
+}
+
+function getMaxOutputTokens(env) {
+  const configured = Number.parseInt(env?.GEMINI_MAX_OUTPUT_TOKENS, 10);
+
+  if (!Number.isNaN(configured) && configured > 0) {
+    return configured;
+  }
+
+  return 2048;
+}
+
+async function callGeminiGenerateContent(text, apiKey, model, maxOutputTokens) {
+  const response = await fetch(`${GEMINI_API_BASE}/models/${model}:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: SYSTEM_PROMPT },
+            { text },
+          ],
+        },
+      ],
+      generationConfig: {
         temperature: 0.2,
-        max_tokens: 800,
-      }),
-    });
+        maxOutputTokens,
+      },
+    }),
+  });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `OpenAI API error: ${response.status}`);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.error?.message || `Gemini API error: ${response.status}`);
+    error.status = response.status;
+    error.model = model;
+    throw error;
+  }
+
+  const data = await response.json();
+  const textResponse = data?.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+
+  if (!textResponse) {
+    const error = new Error('Gemini returned an empty response');
+    error.status = 502;
+    error.model = model;
+    throw error;
+  }
+
+  return textResponse;
+}
+
+function splitTextIntoChunks(text, maxChars = CHUNK_CHAR_LIMIT) {
+  if (!text || text.length <= maxChars) {
+    return [text];
+  }
+
+  const chunks = [];
+  const paragraphs = text.split(/\n\s*\n/);
+  let currentChunk = '';
+
+  for (const paragraph of paragraphs) {
+    const candidate = currentChunk ? `${currentChunk}\n\n${paragraph}` : paragraph;
+
+    if (candidate.length <= maxChars) {
+      currentChunk = candidate;
+      continue;
     }
 
-    const data = await response.json();
-    return data.choices[0].message.content;
+    if (currentChunk) {
+      chunks.push(currentChunk);
+      currentChunk = '';
+    }
+
+    if (paragraph.length <= maxChars) {
+      currentChunk = paragraph;
+      continue;
+    }
+
+    for (let index = 0; index < paragraph.length; index += maxChars) {
+      chunks.push(paragraph.slice(index, index + maxChars));
+    }
+  }
+
+  if (currentChunk) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks.filter(Boolean);
+}
+
+/**
+ * Simplify legal text using Gemini
+ */
+async function simplifyInstructions(text, apiKey, preferredModel, maxOutputTokens) {
+  try {
+    const modelCandidates = buildModelCandidates(preferredModel);
+    let lastError = null;
+
+    const chunks = splitTextIntoChunks(text, CHUNK_CHAR_LIMIT);
+    const chunkResults = [];
+
+    for (const chunk of chunks) {
+      let chunkResult = null;
+
+      for (const model of modelCandidates) {
+        try {
+          chunkResult = await callGeminiGenerateContent(chunk, apiKey, model, maxOutputTokens);
+          break;
+        } catch (error) {
+          lastError = error;
+          if (error?.status === 404) {
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      if (!chunkResult) {
+        if (lastError) {
+          throw lastError;
+        }
+        throw new Error('No Gemini model candidates available');
+      }
+
+      chunkResults.push(chunkResult);
+    }
+
+    if (chunkResults.length === 1) {
+      return chunkResults[0];
+    }
+
+    return chunkResults
+      .map((result, index) => `Section ${index + 1}:\n${result}`)
+      .join('\n\n');
   } catch (error) {
     // Security: Don't expose API key in error messages
     let errorMsg = error.message || 'Unknown error';
     if (apiKey && errorMsg.includes(apiKey)) {
       errorMsg = errorMsg.replace(apiKey, '***REDACTED***');
     }
-    throw new Error(`Error calling OpenAI API: ${errorMsg}`);
+    throw new Error(`Error calling Gemini API: ${errorMsg}`);
   }
 }
 
@@ -121,12 +262,14 @@ export async function onRequest(context) {
 
     // Simplify endpoint
     if (pathname === '/api/simplify' && request.method === 'POST') {
-      const apiKey = env.OPENAI_API_KEY;
+      const apiKey = env.GEMINI_API_KEY;
+      const configuredModel = env.GEMINI_MODEL;
+      const maxOutputTokens = getMaxOutputTokens(env);
       if (!apiKey) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: 'OPENAI_API_KEY is not configured',
+            error: 'GEMINI_API_KEY is not configured',
           }),
           {
             status: 500,
@@ -139,11 +282,11 @@ export async function onRequest(context) {
       }
 
       // Validate API key format
-      if (!apiKey.startsWith('sk-')) {
+      if (apiKey.length < 20) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: 'Invalid API key format',
+            error: 'Invalid Gemini API key format',
           }),
           {
             status: 500,
@@ -174,7 +317,7 @@ export async function onRequest(context) {
         );
       }
 
-      const simplified = await simplifyInstructions(text, apiKey);
+      const simplified = await simplifyInstructions(text, apiKey, configuredModel, maxOutputTokens);
 
       return new Response(
         JSON.stringify({

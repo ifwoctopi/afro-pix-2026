@@ -8,10 +8,13 @@
  * - For local development, use localhost:5000
  */
 
-// If deployed on Cloudflare Pages, use relative URLs (empty string = same origin)
-// For local development, use localhost
-const API_URL = process.env.REACT_APP_API_URL !== undefined 
-  ? process.env.REACT_APP_API_URL 
+// If deployed on Cloudflare Pages, use relative URLs (same origin)
+// For local development, use localhost unless an explicit non-empty URL is provided.
+const envApiUrl = process.env.REACT_APP_API_URL;
+const hasExplicitApiUrl = typeof envApiUrl === 'string' && envApiUrl.trim().length > 0;
+
+const API_URL = hasExplicitApiUrl
+  ? envApiUrl.trim()
   : (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
 
 export default API_URL;

@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { saveSearch, getSearchHistory } from '../services/searchService';
-import { Upload, FileText, X, History, Book } from 'lucide-react';
+import { Upload, FileText, X, Book, MapPin } from 'lucide-react';
 import API_URL from '../config/api';
 import * as pdfjsLib from 'pdfjs-dist';
 import './Search.css';
@@ -17,37 +16,17 @@ const Search = () => {
   const [showResults, setShowResults] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileName, setFileName] = useState('');
-  const [searchHistory, setSearchHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
   const fileInputRef = useRef(null);
-  const { user, userEmail, logout } = useAuth();
+  const { userEmail, logout } = useAuth();
+  const [aiKeyword, setAiKeyword] = useState('');
   const navigate = useNavigate();
 
   const exampleQueries = [
-    'How do I put in my insulin pump?',
-    'What are the side effects of my medication?',
-    'How do I use my blood pressure monitor?',
-    'What does this medical procedure involve?'
+    'What does this lease agreement clause mean?',
+    'Can you simplify this employment contract?',
+    'What are my rights in this eviction notice?',
+    'What should I know before signing this legal document?'
   ];
-
-  const loadSearchHistory = useCallback(async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await getSearchHistory(user.id, 10);
-      if (!error && data) {
-        setSearchHistory(data);
-      }
-    } catch (error) {
-      console.error('Error loading search history:', error);
-    }
-  }, [user]);
-
-  // Load search history on component mount
-  useEffect(() => {
-    if (user) {
-      loadSearchHistory();
-    }
-  }, [user, loadSearchHistory]);
 
   /**
    * Extract text from PDF file using pdf.js
@@ -72,6 +51,7 @@ const Search = () => {
       throw new Error(`Failed to extract text from PDF: ${error.message}`);
     }
   };
+
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -137,7 +117,11 @@ const Search = () => {
       }
     } catch (error) {
       console.error('Error:', error);
-      alert(`Failed to process file: ${error.message}`);
+      if (error?.message?.includes('Failed to fetch')) {
+        alert('Cannot reach API server. Start backend with: npm run dev:api');
+      } else {
+        alert(`Failed to process file: ${error.message}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -146,53 +130,51 @@ const Search = () => {
   const simplifyText = async (text, fileUploaded = false) => {
     setIsLoading(true);
     setShowResults(false);
-
+  
     try {
       const response = await fetch(`${API_URL}/api/simplify`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: text }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to simplify instructions');
+        throw new Error(data.error || 'Failed to simplify document');
       }
-
+  
       if (data.success) {
         setResult(data.result);
         setShowResults(true);
-        
-        // Save search to Supabase if user is logged in (but not for file uploads)
-        if (user && user.id && !fileUploaded) {
-          try {
-            await saveSearch(user.id, text, data.result, false);
-            // Reload search history
-            loadSearchHistory();
-          } catch (saveError) {
-            console.error('Error saving search:', saveError);
-            // Don't show error to user - search worked, just history save failed
-          }
+
+        // Extract AI lawyer keyword and trigger map search
+        if (data.aiKeywords) {
+          setAiKeyword(data.aiKeywords);           // store AI keyword
+          // map component (LawyerMap) will watch `aiKeyword` and perform the
+          // places lookup automatically once it has loaded.
         }
       } else {
         throw new Error(data.error || 'Unknown error occurred');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert(`Failed to simplify instructions: ${error.message}`);
+      if (error?.message?.includes('Failed to fetch')) {
+        alert('Cannot reach API server. Start backend with: npm run dev:api');
+      } else {
+        alert(`Failed to simplify document: ${error.message}`);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!medicalText.trim()) {
-      alert('Please enter some medical instructions to simplify or upload a file');
+      alert('Please enter a legal document or instructions to simplify, or upload a file');
       return;
     }
 
@@ -213,6 +195,7 @@ const Search = () => {
     setResult('');
     setShowResults(false);
     handleRemoveFile();
+    setAiKeyword('');
   };
 
   const handleExampleClick = (example) => {
@@ -229,7 +212,7 @@ const Search = () => {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <h2>🏥 Medi-Chat</h2>
+            <h2>⚖️ Legal Compass AI</h2>
           </div>
           <div className="nav-user">
             <button 
@@ -237,7 +220,14 @@ const Search = () => {
               onClick={() => navigate('/dictionary')}
             >
               <Book size={16} />
-              Dictionary
+              Legal Glossary
+            </button>
+            <button
+              className="dictionary-btn"
+              onClick={() => navigate('/advisors', { state: { aiKeyword } })}
+            >
+              <MapPin size={16} />
+              Legal Advisors
             </button>
             <span>{userEmail}</span>
             <button className="btn btn-secondary" onClick={handleLogout}>
@@ -249,9 +239,9 @@ const Search = () => {
       
       <div className="container">
         <div className="search-section">
-          <h1>Simplify Medical Instructions</h1>
+          <h1>Simplify Legal Documents</h1>
           <p className="subtitle">
-            Enter medical or device instructions below to get a simplified, easy-to-understand version
+            Paste legal text or upload a legal document to get a clear, plain-language explanation
           </p>
           
           <div className="search-container">
@@ -269,7 +259,7 @@ const Search = () => {
                 />
                 <label htmlFor="file-upload" className="file-upload-label">
                   <Upload className="upload-icon" size={24} />
-                  <span>Upload Medical Document</span>
+                  <span>Upload Legal Document</span>
                   <span className="file-types">(.txt, .md, .pdf)</span>
                 </label>
               </div>
@@ -299,7 +289,7 @@ const Search = () => {
                   value={medicalText}
                   onChange={(e) => setMedicalText(e.target.value)}
                   className="search-input"
-                  placeholder="Enter medical instructions, device manuals, or medical terminology here..."
+                  placeholder="Enter contract text, policy language, notices, or legal terms here..."
                   rows="6"
                   required
                 />
@@ -309,7 +299,7 @@ const Search = () => {
                 {isLoading ? (
                   <span className="spinner">⏳ Processing...</span>
                 ) : (
-                  'Simplify Instructions'
+                  'Simplify'
                 )}
               </button>
             </form>
@@ -317,8 +307,17 @@ const Search = () => {
           
           {showResults && (
             <div className="results-container">
-              <h2>Simplified Instructions</h2>
+              <h2>Simplified Legal Summary</h2>
               <div className="result-content">{result}</div>
+              <div className="results-actions">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate('/advisors', { state: { aiKeyword } })}
+                >
+                  <MapPin size={16} />
+                  Find Nearby Legal Advisors
+                </button>
+              </div>
               <button className="btn btn-secondary" onClick={handleClear}>
                 Clear Results
               </button>
@@ -340,50 +339,6 @@ const Search = () => {
             </div>
           </div>
 
-          {/* Search History */}
-          {user && searchHistory.length > 0 && (
-            <div className="search-history-section">
-              <div className="history-header">
-                <h3>Recent Searches</h3>
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="history-toggle-btn"
-                >
-                  <History size={20} />
-                  {showHistory ? 'Hide' : 'Show'} History
-                </button>
-              </div>
-              {showHistory && (
-                <div className="history-list">
-                  {searchHistory.map((search) => (
-                    <div key={search.id} className="history-item">
-                      <div className="history-item-content">
-                        <div className="history-query">
-                          {search.file_uploaded && <FileText size={16} className="file-indicator" />}
-                          <span className="history-text">
-                            {search.query.substring(0, 100)}
-                            {search.query.length > 100 ? '...' : ''}
-                          </span>
-                        </div>
-                        <div className="history-date">
-                          {new Date(search.created_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setMedicalText(search.query);
-                          simplifyText(search.query, search.file_uploaded);
-                        }}
-                        className="history-use-btn"
-                      >
-                        Use
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

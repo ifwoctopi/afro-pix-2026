@@ -1,10 +1,11 @@
 .dictionary-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #fbf6ee 0%, #f2e4d1 100%);
 }
 
 .navbar {
-  background: white;
+  background: #f7efe2;
+  border-bottom: 1px solid #d2b290;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   padding: 15px 0;
   margin-bottom: 30px;
@@ -22,7 +23,7 @@
 }
 
 .nav-logo h2 {
-  color: #667eea;
+  color: #c08b5c;
   font-size: 24px;
   margin: 0;
 }
@@ -34,7 +35,7 @@
 }
 
 .nav-user-email {
-  color: #666;
+  color: #e8d8c7;
   font-size: 14px;
 }
 
@@ -45,7 +46,8 @@
 }
 
 .dictionary-section {
-  background: white;
+  background: #fffaf3;
+  border: 1px solid #d5bfaa;
   border-radius: 16px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -68,7 +70,7 @@
 }
 
 .header-icon {
-  color: #667eea;
+  color: #7b5737;
 }
 
 .subtitle {
@@ -87,7 +89,7 @@
 .quiz-btn {
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #8b5e3c 0%, #6f492d 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -100,9 +102,9 @@
 }
 
 .quiz-btn:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #9a6a45 0%, #7b5434 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(95, 66, 42, 0.4);
 }
 
 .search-container {
@@ -142,7 +144,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #7b5737;
 }
 
 .search-btn {
@@ -162,22 +164,23 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8b5e3c 0%, #6f492d 100%);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(95, 66, 42, 0.4);
 }
 
 .btn-secondary {
-  background: #f0f0f0;
-  color: #333;
+  background: #ead7bf;
+  color: #4f3826;
+  border: 1px solid #c9a37a;
 }
 
 .btn-secondary:hover {
-  background: #e0e0e0;
+  background: #e0c6a7;
 }
 
 .loading-container {
@@ -230,8 +233,8 @@
 }
 
 .term-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  border-color: #7b5737;
+  box-shadow: 0 4px 12px rgba(95, 66, 42, 0.2);
   transform: translateY(-2px);
 }
 
@@ -243,7 +246,7 @@
 }
 
 .term-title {
-  color: #667eea;
+  color: #5f422a;
   font-size: 20px;
   font-weight: 600;
   margin: 0;
@@ -251,7 +254,7 @@
 }
 
 .info-icon {
-  color: #667eea;
+  color: #5f422a;
   opacity: 0.6;
   flex-shrink: 0;
   margin-left: 8px;
@@ -340,7 +343,7 @@
 }
 
 .modal-title {
-  color: #667eea;
+  color: #7b5737;
   font-size: 28px;
   font-weight: 600;
   margin: 0;
@@ -385,7 +388,7 @@
   background: #f8f9ff;
   padding: 16px;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #7b5737;
 }
 
 /* Responsive Design */

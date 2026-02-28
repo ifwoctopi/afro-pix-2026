@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAllDictionaryTerms } from '../services/dictionaryService';
-import { Search as SearchIcon, Book, X, Info, HelpCircle } from 'lucide-react';
+import { Search as SearchIcon, Book, X, Info, HelpCircle, MapPin } from 'lucide-react';
 import './Dictionary.css';
 
 const Dictionary = () => {
@@ -86,14 +86,21 @@ const Dictionary = () => {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <h2>🏥 Medi-Chat</h2>
+            <h2>⚖️ Legal Compass AI</h2>
           </div>
           <div className="nav-actions">
             <button 
               className="btn btn-secondary" 
               onClick={() => navigate('/search')}
             >
-              AI Simplifier
+              AI Legal Assistant
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => navigate('/advisors')}
+            >
+              <MapPin size={16} style={{ marginRight: '6px' }} />
+              Legal Advisors
             </button>
             <span className="nav-user-email">{userEmail}</span>
             <button className="btn btn-secondary" onClick={handleLogout}>
@@ -108,10 +115,10 @@ const Dictionary = () => {
           <div className="dictionary-header">
             <h1>
               <Book size={32} className="header-icon" />
-              Medical Dictionary
+              Legal Glossary
             </h1>
             <p className="subtitle">
-              Browse and search medical terms. Click on any term to see the full definition and why it matters.
+              Browse and search legal terms. Click any term to see the full definition and why it matters.
             </p>
             <div className="header-actions">
               <button 
@@ -119,7 +126,7 @@ const Dictionary = () => {
                 onClick={() => navigate('/quiz')}
               >
                 <HelpCircle size={18} style={{ marginRight: '8px' }} />
-                Quiz Yourself
+                Test Your Legal Terms
               </button>
             </div>
           </div>
@@ -132,7 +139,7 @@ const Dictionary = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search medical terms..."
+                  placeholder="Search legal terms..."
                   className="search-input"
                 />
               </div>
@@ -156,7 +163,7 @@ const Dictionary = () => {
               {filteredTerms.length === 0 ? (
                 <div className="no-results">
                   <Book size={48} className="no-results-icon" />
-                  <p>No terms found. Try a different search query.</p>
+                  <p>No legal terms found. Try a different search query.</p>
                 </div>
               ) : (
                 <div className="terms-grid">
